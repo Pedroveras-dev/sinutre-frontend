@@ -1,10 +1,18 @@
 //import { useState } from 'react';
+import { SignOut } from '@phosphor-icons/react';
 import { NAV_ITEMS } from '@/constants/navigation';
+import { clearToken } from '@/lib/api';
 import { SidebarBrand } from './SidebarBrand';
 import { SidebarItem } from './SidebarItem';
 
 interface SidebarProps {
   drawerId: string;
+}
+
+// Sai da conta: apaga o token salvo e recarrega na tela de login.
+function logout() {
+  clearToken();
+  window.location.assign('/login');
 }
 
 export function Sidebar({ drawerId }: SidebarProps) {
@@ -34,6 +42,19 @@ export function Sidebar({ drawerId }: SidebarProps) {
               expanded={expanded}
             />
           ))}
+        </ul>
+
+        <ul className="menu w-full pb-4">
+          <li>
+            <button
+              type="button"
+              className="flex items-center gap-4 px-4 h-12"
+              onClick={logout}
+            >
+              <SignOut size={22} />
+              {expanded && <span>Sair</span>}
+            </button>
+          </li>
         </ul>
       </div>
     </aside>
