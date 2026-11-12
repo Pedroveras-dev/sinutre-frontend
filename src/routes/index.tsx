@@ -9,6 +9,7 @@ import { LoginPage } from '@/pages/LoginPage';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { ProtectedRoute } from './ProtectRoute';
 import { DietFoodPage } from '@/pages/DietFood';
+import { SettingsPage } from '@/pages/SettingsPage';
 
 export function Router() {
   return (
@@ -31,6 +32,11 @@ export function Router() {
             path="/foods"
             element={<DietFoodPage />}
         
+          />
+
+          <Route
+            path="/settings"
+            element={<SettingsPage />}
           />
 
         </Route>
