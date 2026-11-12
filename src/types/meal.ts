@@ -32,7 +32,8 @@ export interface MacroSummary {
   proteins: number;
   fats: number;
   calories: number;
-  caloriesGoal: number;
+  // null: o usuário ainda não definiu uma meta diária.
+  caloriesGoal: number | null;
 }
 
 export interface MealsSummary {

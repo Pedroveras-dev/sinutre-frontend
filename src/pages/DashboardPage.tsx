@@ -1,6 +1,11 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { AddMealCard } from '@/components/cards/AddMealCard';
 import { TotalMealsCard } from '@/components/cards/TotalMealsCard';
+import {
+  CalorieGoalCard,
+  type CalorieGoalState,
+} from '@/components/cards/CalorieGoalCard';
+import { getCalorieGoal } from '@/services/calorieGoalService';
 import { Header } from '@/components/layout/Header';
 import { MacroStatsBar } from '@/components/macros/MacroStatsBar';
 import { MealFab } from '@/components/meals/MealFab';
@@ -47,9 +52,27 @@ export function DashboardPage({ drawerId }: DashboardPageProps) {
     }
   }
 
+  // Meta diária do usuário, carregada do backend (antes era um valor fixo).
+  // Fica separada das refeições: se a meta falhar, o resto do dashboard
+  // continua funcionando e o card oferece "Tentar novamente".
+  const [goalState, setGoalState] = useState<CalorieGoalState>({
+    status: 'loading',
+  });
+
+  const loadGoal = useCallback(async () => {
+    setGoalState({ status: 'loading' });
+    try {
+      const goal = await getCalorieGoal();
+      setGoalState({ status: 'ready', goal: goal.caloriesGoal });
+    } catch {
+      setGoalState({ status: 'error' });
+    }
+  }, []);
+
   useEffect(() => {
     loadMeals();
-  }, []);
+    loadGoal();
+  }, [loadGoal]);
 
   // "Hoje" é o dia do calendário no fuso do navegador (ver utils/date.ts).
   const mealsSummary = useMemo(() => countMeals(meals, new Date()), [meals]);
@@ -57,9 +80,9 @@ export function DashboardPage({ drawerId }: DashboardPageProps) {
   const macroSummary = useMemo(
     () => ({
       ...sumMacrosOfDay(meals, new Date()),
-      caloriesGoal: 1000, //ainda não veio do banco de dados
+      caloriesGoal: goalState.status === 'ready' ? goalState.goal : null,
     }),
-    [meals],
+    [meals, goalState],
   );
 
   // Só depois de todos os hooks: hooks não podem ficar após um return.
@@ -85,6 +108,12 @@ export function DashboardPage({ drawerId }: DashboardPageProps) {
         />
 
         <MacroStatsBar summary={macroSummary} />
+
+        <CalorieGoalCard
+          consumedCalories={macroSummary.calories}
+          goalState={goalState}
+          onRetry={loadGoal}
+        />
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-6 items-stretch">
           <TotalMealsCard summary={mealsSummary} />
