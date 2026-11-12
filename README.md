@@ -25,6 +25,7 @@ nutrição em **React 19 + TypeScript + Vite 6**, com **Tailwind CSS v4** e
 | Volta ao login em `401` e botão **Sair** | `src/lib/api.ts`, `src/components/layout/Sidebar.tsx` |
 | Editar e apagar alimentos | `src/pages/DietFood.tsx`, `src/components/modal/FoodFormModal.tsx`, `src/utils/food.ts` |
 | Apagar refeições | `src/pages/DashboardPage.tsx`, `src/components/modal/ConfirmDialog.tsx` |
+| Página **Progresso** (`/stats`) com gráfico dos últimos 7 dias | `src/pages/ProgressPage.tsx`, `src/components/charts/CaloriesBarChart.tsx`, `src/utils/progress.ts` |
 
 ### Meta diária de calorias
 
@@ -62,6 +63,22 @@ O original só permitia cadastrar. Agora:
   totais do dia e o progresso da meta são recalculados.
 - Editar um alimento **não altera refeições já registradas**: elas guardam os
   valores da época em que foram criadas.
+
+### Página Progresso
+
+O item "Progresso" do menu apontava para uma rota que não existia. Agora
+mostra as calorias dos **últimos 7 dias** comparadas com a meta:
+
+- gráfico de barras por dia, com a linha da meta; dias acima da meta ficam em
+  vermelho e marcados com ▲, e dias sem registro ficam em cinza;
+- média diária (só dos dias com refeição), dias dentro da meta e total de
+  refeições no período;
+- detalhe do dia ao passar o mouse, focar ou tocar numa barra, e os mesmos
+  números em tabela.
+
+O gráfico é feito com HTML e CSS, sem biblioteca. Os dados vêm das rotas que
+já existiam (`GET /meals` e `GET /calorie-goal`); o agrupamento por dia é
+feito no navegador, no fuso do usuário.
 
 ## Instalação e execução local
 
@@ -139,9 +156,9 @@ src/
 ├── constants/    # categorias de refeição, itens de navegação
 ├── context/      # AuthContext (usuário autenticado)
 ├── lib/          # cliente HTTP (axios + token)
-├── pages/        # Dashboard, DietFood, Settings, Login
+├── pages/        # Dashboard, DietFood, Progress, Settings, Login
 ├── routes/       # rotas e rota protegida
 ├── services/     # chamadas à API
 ├── types/        # tipos de domínio
-└── utils/        # datas, resumo diário, regras da meta (+ testes)
+└── utils/        # datas, resumo diário, progresso, regras da meta (+ testes)
 ```
