@@ -23,6 +23,8 @@ nutrição em **React 19 + TypeScript + Vite 6**, com **Tailwind CSS v4** e
 | Correção do cálculo "calorias de hoje" | `src/utils/date.ts`, `src/utils/mealSummary.ts` |
 | Testes unitários (vitest) | `src/utils/*.test.ts` |
 | Volta ao login em `401` e botão **Sair** | `src/lib/api.ts`, `src/components/layout/Sidebar.tsx` |
+| Editar e apagar alimentos | `src/pages/DietFood.tsx`, `src/components/modal/FoodFormModal.tsx`, `src/utils/food.ts` |
+| Apagar refeições | `src/pages/DashboardPage.tsx`, `src/components/modal/ConfirmDialog.tsx` |
 
 ### Meta diária de calorias
 
@@ -47,6 +49,20 @@ comparação usa dia, mês e ano no fuso do navegador (`isSameLocalDay`). O
 modal de refeição também passou a enviar a data em ISO/UTC, para o horário
 gravado não depender do fuso do servidor.
 
+### Editar e apagar alimentos e refeições
+
+O original só permitia cadastrar. Agora:
+
+- Na página **Dieta**, cada alimento tem os botões **Editar** e **Apagar**.
+  O mesmo modal serve para cadastrar e editar, com validação (nome
+  obrigatório, macros numéricos ≥ 0, aceita vírgula decimal).
+- Apagar pede confirmação. Se o alimento for usado em alguma refeição, o
+  backend recusa e a tela mostra em quantas refeições ele aparece.
+- No **dashboard**, cada refeição tem o botão **Apagar**; ao confirmar, os
+  totais do dia e o progresso da meta são recalculados.
+- Editar um alimento **não altera refeições já registradas**: elas guardam os
+  valores da época em que foram criadas.
+
 ## Instalação e execução local
 
 Requisitos: Node.js 20+ e o [backend](https://github.com/Pedroveras-dev/sinutre-backend) rodando.
@@ -70,7 +86,7 @@ Variáveis `VITE_*` são embutidas no JavaScript público no momento do build:
 
 ```bash
 npm run lint    # ESLint
-npm test        # vitest: validação da meta, progresso e cálculo diário
+npm test        # vitest: validação da meta e de alimentos, progresso e cálculo diário
 npm run build   # tsc -b + vite build
 ```
 
@@ -82,7 +98,10 @@ Roteiro manual:
 4. Em **Dieta**, cadastre um alimento; no dashboard, adicione uma refeição de
    hoje e veja o progresso. Adicione mais até passar da meta.
 5. Cadastre uma refeição com data de outro dia: ela não entra em "hoje".
-6. Clique em **Sair** e entre com outra conta: a meta dela é independente.
+6. Em **Dieta**, edite um alimento: as refeições antigas mantêm os totais.
+7. Tente apagar um alimento usado em refeição (recusado, com aviso); apague
+   a refeição no dashboard e depois o alimento.
+8. Clique em **Sair** e entre com outra conta: a meta dela é independente.
 
 ## Deploy
 
