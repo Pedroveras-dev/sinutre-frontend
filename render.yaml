@@ -1,0 +1,20 @@
+# Blueprint do Render (https://render.com/docs/blueprint-spec).
+# Publica o frontend como Static Site (gratuito, com HTTPS).
+services:
+  - type: web
+    name: sinutre-frontend
+    runtime: static
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./dist
+    # SPA: qualquer caminho (/settings, /foods...) devolve o index.html e o
+    # React Router resolve a rota. Sem isso, recarregar /settings daria 404.
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      # URL pública do backend; é lida no BUILD e embutida no site.
+      - key: VITE_API_URL
+        sync: false
