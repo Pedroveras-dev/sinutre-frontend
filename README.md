@@ -84,20 +84,33 @@ Roteiro manual:
 5. Cadastre uma refeição com data de outro dia: ela não entra em "hoje".
 6. Clique em **Sair** e entre com outra conta: a meta dela é independente.
 
-## Deploy (Render Static Site, gratuito)
+## Deploy
 
-1. No Render: *New → Blueprint* e escolha este repositório. O `render.yaml`
-   define build `npm ci && npm run build`, pasta `dist` e a regra de rewrite
-   `/* → /index.html`, que permite abrir ou recarregar `/settings` e `/foods`
-   diretamente.
-2. Informe `VITE_API_URL` com a URL pública do backend
-   (`https://SEU-BACKEND.onrender.com`). Como ela é lida no build, mudar o
-   valor exige um novo deploy.
-3. No backend, `FRONTEND_URL` deve ser exatamente a URL deste site (CORS e
-   redirect do login).
+O frontend é um site estático (pasta `dist`). O repositório traz a
+configuração de duas opções gratuitas, ambas com HTTPS; use uma delas.
 
-O HTTPS é fornecido pelo Render. O backend gratuito hiberna após 15 min sem
-uso; o primeiro acesso depois disso pode levar cerca de 1 minuto.
+### Opção A — Vercel
+
+1. Em <https://vercel.com/new>, importe este repositório. A Vercel detecta o
+   Vite sozinha (build `npm run build`, saída `dist`).
+2. Em **Environment Variables**, crie `VITE_API_URL` com a URL pública do
+   backend (`https://SEU-BACKEND.onrender.com`, sem `/` final) e faça o deploy.
+3. O `vercel.json` reescreve qualquer caminho para `/index.html`, o que
+   permite abrir ou recarregar `/settings` e `/foods` diretamente.
+
+### Opção B — Render Static Site
+
+*New → Blueprint* e escolha este repositório. O `render.yaml` define o build
+`npm ci && npm run build`, a pasta `dist` e a mesma regra de rewrite. Informe
+`VITE_API_URL` quando o Render pedir.
+
+### Nas duas opções
+
+- `VITE_API_URL` é lida no **build**: mudar o valor exige um novo deploy.
+- No backend, `FRONTEND_URL` deve ser exatamente a URL deste site (CORS e
+  redirect do login). Use a URL de produção fixa, não as URLs de preview.
+- O backend gratuito hiberna após 15 min sem uso; o primeiro acesso depois
+  disso pode levar cerca de 1 minuto.
 
 ## Estrutura
 
