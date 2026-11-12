@@ -58,3 +58,21 @@ api.interceptors.request.use((config) => {
 
   return config;
 });
+
+// Token ausente, inválido ou expirado: o backend responde 401. Em vez de
+// deixar a tela em branco, descarta o token e volta para o login.
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (
+      axios.isAxiosError(error) &&
+      error.response?.status === 401 &&
+      window.location.pathname !== '/login'
+    ) {
+      clearToken();
+      window.location.assign('/login');
+    }
+
+    return Promise.reject(error);
+  },
+);
