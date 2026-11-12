@@ -80,7 +80,9 @@ function AddMealModalContent({
     }
 
     if (items.length === 0) {
-      setError('Adicione ao menos um alimento à refeição.');
+      setError(
+        'A refeição ainda não tem itens. Escolha um alimento da lista, informe os gramas e clique em "Adicionar".',
+      );
       return;
     }
 
@@ -140,7 +142,10 @@ function AddMealModalContent({
 
         <div className="mb-4">
           <h3 className="text-lg font-semibold mb-4">Itens da Refeição</h3>
-          <MealItemForm onAdd={handleAddItem} />
+          <MealItemForm
+            onAdd={handleAddItem}
+            addedFoodIds={items.map((item) => item.foodId)}
+          />
         </div>
 
         <MealItemsTable items={items} onRemove={handleRemoveItem} />
