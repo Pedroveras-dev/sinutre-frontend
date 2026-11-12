@@ -9,8 +9,8 @@ nutrição em **React 19 + TypeScript + Vite 6**, com **Tailwind CSS v4** e
 > calorias por usuário** e a preparação para deploy.
 >
 > - Backend deste sistema: <https://github.com/Pedroveras-dev/sinutre-backend>
-> - Site publicado: _preencher após o deploy_
-> - API publicada: _preencher após o deploy_
+> - Site publicado: <https://sinutre-frontend-alpha.vercel.app>
+> - API publicada: <https://sinutre-backend.onrender.com> (verificação: [`/health`](https://sinutre-backend.onrender.com/health))
 
 ## O que este fork acrescenta
 
