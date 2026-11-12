@@ -9,6 +9,7 @@ import { MEAL_CATEGORY_BY_ID } from '@/constants/mealCategories';
 import { createMeal } from '@/services/mealService';
 
 import { MealState } from '@/types/meal';
+import { localDateTimeToISO } from '@/utils/date';
 
 interface AddMealModalProps {
   open: boolean;
@@ -19,24 +20,33 @@ interface AddMealModalProps {
 }
 
 
-export function AddMealModal({
+// O modal só existe enquanto há uma categoria escolhida. Separar em dois
+// componentes mantém os hooks fora de um `if` (regra dos hooks) e faz o
+// formulário começar limpo a cada abertura, já que o conteúdo é desmontado.
+export function AddMealModal(props: AddMealModalProps) {
+  if (!props.typeMeal) {
+    return null;
+  }
+
+  return <AddMealModalContent {...props} typeMeal={props.typeMeal} />;
+}
+
+function AddMealModalContent({
   open,
   typeMeal,
   onClose,
-  //onSave,
-  onMealCreated
-}: AddMealModalProps) {
-  if(!typeMeal){
-    return <></>
-  }
-
+  onMealCreated,
+}: AddMealModalProps & { typeMeal: MealCategory }) {
   const category = MEAL_CATEGORY_BY_ID[typeMeal];
-  
+
   const [meal, setMeal] = useState<MealState>({
     description: '',
     type: category.id,
     eatTime: '',
   });
+
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const [items, setItems] = useState<FoodItem[]>([]);
 
@@ -60,17 +70,41 @@ export function AddMealModal({
   }
 
   async function handleSaveMeal() {
-    await createMeal({
-      ...meal,
-      items: items.map((item) => ({
-        foodId: item.foodId,
-        grams: item.grams,
-      })),
-    });
+    // O datetime-local não tem fuso; convertemos para ISO (UTC) no navegador
+    // para o backend gravar o instante correto em qualquer servidor.
+    const eatTime = localDateTimeToISO(meal.eatTime);
 
-    await onMealCreated();
+    if (!eatTime) {
+      setError('Informe a data e o horário da refeição.');
+      return;
+    }
 
-    onClose();
+    if (items.length === 0) {
+      setError('Adicione ao menos um alimento à refeição.');
+      return;
+    }
+
+    setError(null);
+    setSaving(true);
+
+    try {
+      await createMeal({
+        ...meal,
+        eatTime,
+        items: items.map((item) => ({
+          foodId: item.foodId,
+          grams: item.grams,
+        })),
+      });
+
+      await onMealCreated();
+
+      onClose();
+    } catch {
+      setError('Não foi possível salvar a refeição. Tente novamente.');
+    } finally {
+      setSaving(false);
+    }
   }
 
   const macros = useMemo(
@@ -111,12 +145,23 @@ export function AddMealModal({
 
         <MealItemsTable items={items} onRemove={handleRemoveItem} />
 
+        {error && (
+          <div role="alert" className="alert alert-error mt-4">
+            <span>{error}</span>
+          </div>
+        )}
+
         <div className="modal-action">
           <button type="button" className="btn btn-ghost" onClick={onClose}>
             Cancelar
           </button>
-          <button type="button" className="btn btn-primary" onClick={handleSaveMeal}>
-            Salvar refeição
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={handleSaveMeal}
+            disabled={saving}
+          >
+            {saving ? 'Salvando...' : 'Salvar refeição'}
           </button>
         </div>
       </div>
