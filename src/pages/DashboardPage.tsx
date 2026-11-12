@@ -18,6 +18,7 @@ import {
   // SAMPLE_MEAL_ITEMS,
 } from '@/data/mockData';
 import { useMealModal } from '@/hooks/useMealModal';
+import { countMeals, sumMacrosOfDay } from '@/utils/mealSummary';
 
 interface DashboardPageProps {
   drawerId: string;
@@ -32,9 +33,6 @@ interface DashboardPageProps {
 
 export function DashboardPage({ drawerId }: DashboardPageProps) {
   const { user } = useAuth();
-  if (!user){
-    return <></>
-  }
   const modal = useMealModal();
 
   const [meals, setMeals] = useState<Meal[]>([]);
@@ -53,66 +51,21 @@ export function DashboardPage({ drawerId }: DashboardPageProps) {
     loadMeals();
   }, []);
 
-  const mealsSummary = useMemo(() => {
-    const today = new Date();
+  // "Hoje" é o dia do calendário no fuso do navegador (ver utils/date.ts).
+  const mealsSummary = useMemo(() => countMeals(meals, new Date()), [meals]);
 
-    const total = meals.length;
+  const macroSummary = useMemo(
+    () => ({
+      ...sumMacrosOfDay(meals, new Date()),
+      caloriesGoal: 1000, //ainda não veio do banco de dados
+    }),
+    [meals],
+  );
 
-    const todayCount = meals.filter((meal) => {
-      const date = new Date(meal.eatTime);
-
-      return (
-        date.getDate() === today.getDate() &&
-        date.getMonth() === today.getMonth() &&
-        date.getFullYear() === today.getFullYear()
-      );
-    }).length;
-
-    const monthCount = meals.filter((meal) => {
-      const date = new Date(meal.eatTime);
-
-      return (
-        date.getMonth() === today.getMonth() &&
-        date.getFullYear() === today.getFullYear()
-      );
-    }).length;
-
-    return {
-      total,
-      thisMonth: monthCount,
-      today: todayCount,
-    };
-  }, [meals]);
-
-  const macroSummary = useMemo(() => {
-    const today = new Date();
-    return meals.filter((meal) => {
-      const date = new Date(meal.eatTime);
-      return (
-        date.getDay() === today.getDay() &&
-        date.getMonth() === today.getMonth() &&
-        date.getFullYear() === today.getFullYear()
-      );
-    }).reduce(
-      (acc, meal) => {
-        acc.carbs += meal.totals.carbs;
-        acc.proteins += meal.totals.proteins;
-        acc.fats += meal.totals.fats;
-        acc.calories += meal.totals.calories;
-
-        return acc;
-      },
-      {
-        carbs: 0,
-        proteins: 0,
-        fats: 0,
-        calories: 0,
-
-        caloriesGoal: 1000, //ainda não veio do banco de dados
-      },
-    );
-  }, [meals]);
-
+  // Só depois de todos os hooks: hooks não podem ficar após um return.
+  if (!user) {
+    return <></>;
+  }
 
   if (loading) {
     return (
