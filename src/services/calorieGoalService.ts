@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { api } from '@/lib/api';
 
 // Resposta de GET/PUT /calorie-goal.
@@ -21,14 +20,4 @@ export async function updateCalorieGoal(caloriesGoal: number) {
     caloriesGoal,
   });
   return response.data;
-}
-
-// Extrai a mensagem { error } devolvida pelo backend, com um texto padrão
-// para falhas de rede ou respostas inesperadas.
-export function getApiErrorMessage(error: unknown, fallback: string): string {
-  if (axios.isAxiosError(error)) {
-    const message = error.response?.data?.error;
-    if (typeof message === 'string') return message;
-  }
-  return fallback;
 }

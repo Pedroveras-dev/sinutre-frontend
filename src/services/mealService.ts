@@ -14,3 +14,8 @@ export async function createMeal(
 ) {
   return api.post('/meals', meal);
 }
+
+// Apaga a refeição e os itens dela.
+export async function deleteMeal(id: number) {
+  await api.delete(`/meals/${id}`);
+}

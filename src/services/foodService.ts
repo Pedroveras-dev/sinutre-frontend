@@ -17,6 +17,23 @@ export async function createFood(
   return response.data;
 }
 
+export async function updateFood(
+  id: number,
+  food: Omit<Food, 'id'>,
+) {
+  const response = await api.put<Food>(
+    `/foods/${id}`,
+    food,
+  );
+
+  return response.data;
+}
+
+// O backend recusa (409) se o alimento for usado em alguma refeição.
+export async function deleteFood(id: number) {
+  await api.delete(`/foods/${id}`);
+}
+
 export async function searchFoods(
   search: string,
 ) {

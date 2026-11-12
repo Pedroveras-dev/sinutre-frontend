@@ -2,8 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 
 import { SimpleHeader } from '@/components/layout/SimpleHeader';
+import { getApiErrorMessage } from '@/lib/api';
 import {
-  getApiErrorMessage,
   getCalorieGoal,
   updateCalorieGoal,
 } from '@/services/calorieGoalService';
