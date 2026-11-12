@@ -3,10 +3,10 @@ import { MealsTableRow } from './MealsTableRow';
 
 interface MealsTableProps {
   meals: Meal[];
-  onActionClick?: (meal: Meal) => void;
+  onDelete?: (meal: Meal) => void;
 }
 
-export function MealsTable({ meals, onActionClick }: MealsTableProps) {
+export function MealsTable({ meals, onDelete }: MealsTableProps) {
   
   return (
     <section className="card bg-base-100 shadow-sm w-full hidden lg:block">
@@ -27,7 +27,7 @@ export function MealsTable({ meals, onActionClick }: MealsTableProps) {
               <MealsTableRow
                 key={meal.id}
                 meal={meal}
-                onActionClick={onActionClick}
+                onDelete={onDelete}
               />
             ))}
           </tbody>

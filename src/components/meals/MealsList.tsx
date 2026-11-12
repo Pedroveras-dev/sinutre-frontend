@@ -3,17 +3,17 @@ import { MealListItem } from './MealListItem';
 
 interface MealsListProps {
   meals: Meal[];
-  onActionClick?: (meal: Meal) => void;
+  onDelete?: (meal: Meal) => void;
 }
 
-export function MealsList({ meals, onActionClick }: MealsListProps) {
+export function MealsList({ meals, onDelete }: MealsListProps) {
   return (
     <section className="flex flex-col gap-3 lg:hidden">
       {meals.map(meal => (
         <MealListItem
           key={meal.id}
           meal={meal}
-          onActionClick={onActionClick}
+          onDelete={onDelete}
         />
       ))}
     </section>

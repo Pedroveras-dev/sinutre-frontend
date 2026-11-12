@@ -1,14 +1,14 @@
-import { DotsThreeVertical } from '@phosphor-icons/react';
+import { Trash } from '@phosphor-icons/react';
 import { MEAL_CATEGORY_BY_ID } from '@/constants/mealCategories';
 import type { Meal } from '@/types/mealSummary';
 import { formatDate } from '@/utils/date';
 
 interface MealListItemProps {
   meal: Meal;
-  onActionClick?: (meal: Meal) => void;
+  onDelete?: (meal: Meal) => void;
 }
 
-export function MealListItem({ meal, onActionClick }: MealListItemProps) {
+export function MealListItem({ meal, onDelete }: MealListItemProps) {
   const category = MEAL_CATEGORY_BY_ID[meal.type];
   const Icon = category.Icon;
 
@@ -24,15 +24,16 @@ export function MealListItem({ meal, onActionClick }: MealListItemProps) {
           <p className="text-xs text-base-content/50">{formatDate(meal.eatTime)}</p>
         </div>
         <span className="badge badge-primary badge-outline badge-sm">
-          {meal.totals.calories} kcal
+          {Math.round(meal.totals.calories)} kcal
         </span>
         <button
           type="button"
-          onClick={() => onActionClick?.(meal)}
-          className="btn btn-ghost btn-sm btn-square"
-          aria-label="Mais ações"
+          onClick={() => onDelete?.(meal)}
+          className="btn btn-ghost btn-sm btn-square text-error"
+          aria-label={`Apagar refeição ${meal.name ?? ''}`}
+          title="Apagar refeição"
         >
-          <DotsThreeVertical size={18} />
+          <Trash size={18} />
         </button>
       </div>
     </article>

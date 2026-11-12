@@ -6,6 +6,8 @@ import {
   type CalorieGoalState,
 } from '@/components/cards/CalorieGoalCard';
 import { getCalorieGoal } from '@/services/calorieGoalService';
+import { deleteMeal } from '@/services/mealService';
+import { ConfirmDialog } from '@/components/modal/ConfirmDialog';
 import { Header } from '@/components/layout/Header';
 import { MacroStatsBar } from '@/components/macros/MacroStatsBar';
 import { MealFab } from '@/components/meals/MealFab';
@@ -14,7 +16,7 @@ import { MealsTable } from '@/components/meals/MealsTable';
 import { AddMealModal } from '@/components/modal/AddMealModal';
 import { useAuth } from '@/context/AuthContext';
 import { Meal } from '@/types/mealSummary';
-import { api } from '@/lib/api';
+import { api, getApiErrorMessage } from '@/lib/api';
 
 import {
   //MACRO_SUMMARY,
@@ -24,6 +26,7 @@ import {
 } from '@/data/mockData';
 import { useMealModal } from '@/hooks/useMealModal';
 import { countMeals, sumMacrosOfDay } from '@/utils/mealSummary';
+import { formatDate } from '@/utils/date';
 
 interface DashboardPageProps {
   drawerId: string;
@@ -74,6 +77,38 @@ export function DashboardPage({ drawerId }: DashboardPageProps) {
     loadGoal();
   }, [loadGoal]);
 
+  // Refeição aguardando confirmação para ser apagada.
+  const [mealToDelete, setMealToDelete] = useState<Meal | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  function closeDeleteDialog() {
+    setMealToDelete(null);
+    setDeleteError(null);
+  }
+
+  async function handleConfirmDelete() {
+    if (!mealToDelete) return;
+
+    setDeleting(true);
+    try {
+      await deleteMeal(mealToDelete.id);
+      // Recarrega a lista: os totais do dia e o progresso da meta são
+      // recalculados a partir dela.
+      await loadMeals();
+      closeDeleteDialog();
+    } catch (error) {
+      setDeleteError(
+        getApiErrorMessage(
+          error,
+          'Não foi possível apagar a refeição. Tente novamente.',
+        ),
+      );
+    } finally {
+      setDeleting(false);
+    }
+  }
+
   // "Hoje" é o dia do calendário no fuso do navegador (ver utils/date.ts).
   const mealsSummary = useMemo(() => countMeals(meals, new Date()), [meals]);
 
@@ -120,11 +155,24 @@ export function DashboardPage({ drawerId }: DashboardPageProps) {
           <AddMealCard onSelectCategory={modal.openWith} />
         </div>
 
-        <MealsTable meals={meals} />
-        <MealsList meals={meals} />
+        <MealsTable meals={meals} onDelete={setMealToDelete} />
+        <MealsList meals={meals} onDelete={setMealToDelete} />
       </div>
 
       <MealFab onSelectCategory={modal.openWith} />
+
+      <ConfirmDialog
+        open={mealToDelete !== null}
+        title="Apagar refeição"
+        message={`Apagar a refeição "${mealToDelete?.name || 'sem descrição'}" de ${
+          mealToDelete ? formatDate(mealToDelete.eatTime) : ''
+        }? Esta ação não pode ser desfeita.`}
+        confirmLabel="Apagar"
+        busy={deleting}
+        error={deleteError}
+        onConfirm={handleConfirmDelete}
+        onCancel={closeDeleteDialog}
+      />
 
       <AddMealModal
         open={modal.open}

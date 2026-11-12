@@ -1,14 +1,14 @@
-import { DotsThree } from '@phosphor-icons/react';
+import { Trash } from '@phosphor-icons/react';
 import { MEAL_CATEGORY_BY_ID } from '@/constants/mealCategories';
 import type { Meal } from '@/types/mealSummary';
 import { formatDate } from '@/utils/date';
 
 interface MealsTableRowProps {
   meal: Meal;
-  onActionClick?: (meal: Meal) => void;
+  onDelete?: (meal: Meal) => void;
 }
 
-export function MealsTableRow({ meal, onActionClick }: MealsTableRowProps) {
+export function MealsTableRow({ meal, onDelete }: MealsTableRowProps) {
   const category = MEAL_CATEGORY_BY_ID[meal.type];
 
   return (
@@ -19,17 +19,18 @@ export function MealsTableRow({ meal, onActionClick }: MealsTableRowProps) {
       <td className="font-semibold">{category.label}</td>
       <td>
         <span className="badge badge-primary badge-outline">
-          {meal.totals.calories} kcal
+          {Math.round(meal.totals.calories)} kcal
         </span>
       </td>
       <td className="text-center">
         <button
           type="button"
-          onClick={() => onActionClick?.(meal)}
-          className="btn btn-sm btn-ghost btn-square"
-          aria-label="Mais ações"
+          onClick={() => onDelete?.(meal)}
+          className="btn btn-sm btn-ghost btn-square text-error"
+          aria-label={`Apagar refeição ${meal.name ?? ''}`}
+          title="Apagar refeição"
         >
-          <DotsThree size={20} />
+          <Trash size={18} />
         </button>
       </td>
     </tr>
