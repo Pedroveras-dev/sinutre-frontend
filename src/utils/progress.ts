@@ -50,6 +50,9 @@ export interface SeriesSummary {
   // Dias com registro em que o consumo ficou em até 100% da meta.
   // null quando o usuário não tem meta definida.
   daysWithinGoal: number | null;
+  // Média como porcentagem da meta (ex.: 96 = média 4% abaixo da meta).
+  // null sem meta ou sem registros.
+  averagePercentOfGoal: number | null;
 }
 
 export function summarizeSeries(
@@ -59,14 +62,20 @@ export function summarizeSeries(
   const recorded = series.filter((day) => day.mealsCount > 0);
   const totalCalories = recorded.reduce((sum, day) => sum + day.calories, 0);
 
+  const averageCalories =
+    recorded.length === 0 ? null : Math.round(totalCalories / recorded.length);
+
   return {
     totalMeals: recorded.reduce((sum, day) => sum + day.mealsCount, 0),
     daysWithMeals: recorded.length,
-    averageCalories:
-      recorded.length === 0 ? null : Math.round(totalCalories / recorded.length),
+    averageCalories,
     daysWithinGoal:
       goal === null
         ? null
         : recorded.filter((day) => Math.round(day.calories) <= goal).length,
+    averagePercentOfGoal:
+      goal === null || averageCalories === null
+        ? null
+        : Math.round((averageCalories / goal) * 100),
   };
 }

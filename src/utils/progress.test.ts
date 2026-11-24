@@ -57,6 +57,7 @@ describe('summarizeSeries', () => {
       daysWithMeals: 3,
       averageCalories: 1533, // (500 + 2600 + 1500) / 3
       daysWithinGoal: 2, // 500 e 1500; 2600 passou
+      averagePercentOfGoal: 77, // 1533 / 2000
     });
   });
 
@@ -64,8 +65,13 @@ describe('summarizeSeries', () => {
     expect(summarizeSeries(series, 1500).daysWithinGoal).toBe(2);
   });
 
-  it('sem meta: daysWithinGoal é null', () => {
+  it('sem meta: daysWithinGoal e averagePercentOfGoal são null', () => {
     expect(summarizeSeries(series, null).daysWithinGoal).toBeNull();
+    expect(summarizeSeries(series, null).averagePercentOfGoal).toBeNull();
+  });
+
+  it('média acima da meta passa de 100%', () => {
+    expect(summarizeSeries(series, 1000).averagePercentOfGoal).toBe(153);
   });
 
   it('sem refeições no período: média null e zeros', () => {
@@ -74,6 +80,7 @@ describe('summarizeSeries', () => {
       daysWithMeals: 0,
       averageCalories: null,
       daysWithinGoal: 0,
+      averagePercentOfGoal: null,
     });
   });
 });

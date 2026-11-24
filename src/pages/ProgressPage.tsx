@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 
+import { BmiCard } from '@/components/cards/BmiCard';
 import { CaloriesBarChart } from '@/components/charts/CaloriesBarChart';
 import { SimpleHeader } from '@/components/layout/SimpleHeader';
 import { api } from '@/lib/api';
 import { getCalorieGoal } from '@/services/calorieGoalService';
+import { getProfile } from '@/services/profileService';
+import type { Profile } from '@/services/profileService';
 import type { Meal } from '@/types/mealSummary';
 import { buildDailySeries, summarizeSeries } from '@/utils/progress';
 
@@ -13,25 +16,27 @@ const DAYS = 7;
 type PageState =
   | { status: 'loading' }
   | { status: 'error' }
-  | { status: 'ready'; meals: Meal[]; goal: number | null };
+  | { status: 'ready'; meals: Meal[]; goal: number | null; profile: Profile };
 
-// Página Progresso: calorias dos últimos 7 dias comparadas com a meta.
-// Usa as rotas que já existem (GET /meals e GET /calorie-goal); o agrupamento
-// por dia é feito aqui, no fuso do navegador.
+// Página Métricas: IMC (altura e peso do perfil) e calorias dos últimos 7
+// dias comparadas com a meta. Usa GET /meals, GET /calorie-goal e
+// GET /profile; o agrupamento por dia é feito aqui, no fuso do navegador.
 export function ProgressPage() {
   const [state, setState] = useState<PageState>({ status: 'loading' });
 
   const load = useCallback(async () => {
     setState({ status: 'loading' });
     try {
-      const [mealsResponse, goal] = await Promise.all([
+      const [mealsResponse, goal, profile] = await Promise.all([
         api.get<Meal[]>('/meals'),
         getCalorieGoal(),
+        getProfile(),
       ]);
       setState({
         status: 'ready',
         meals: mealsResponse.data,
         goal: goal.caloriesGoal,
+        profile,
       });
     } catch {
       setState({ status: 'error' });
@@ -52,20 +57,20 @@ export function ProgressPage() {
   return (
     <div className="w-full max-w-[1200px] mx-auto">
       <SimpleHeader
-        title="Progresso"
-        subtitle={`Suas calorias nos últimos ${DAYS} dias`}
+        title="Métricas"
+        subtitle={`Seu IMC e suas calorias nos últimos ${DAYS} dias`}
       />
 
       {state.status === 'loading' && (
         <div className="flex items-center gap-3 mt-6 text-base-content/60" role="status">
           <span className="loading loading-spinner loading-md" />
-          Carregando seu progresso...
+          Carregando suas métricas...
         </div>
       )}
 
       {state.status === 'error' && (
         <div role="alert" className="alert alert-error mt-6">
-          <span>Não foi possível carregar seu progresso.</span>
+          <span>Não foi possível carregar suas métricas.</span>
           <button type="button" className="btn btn-sm" onClick={load}>
             Tentar novamente
           </button>
@@ -73,7 +78,12 @@ export function ProgressPage() {
       )}
 
       {state.status === 'ready' && (
-        <ProgressContent series={series} goal={state.goal} today={today} />
+        <ProgressContent
+          series={series}
+          goal={state.goal}
+          profile={state.profile}
+          today={today}
+        />
       )}
     </div>
   );
@@ -82,16 +92,27 @@ export function ProgressPage() {
 function ProgressContent({
   series,
   goal,
+  profile,
   today,
 }: {
   series: ReturnType<typeof buildDailySeries>;
   goal: number | null;
+  profile: Profile;
   today: Date;
 }) {
   const summary = summarizeSeries(series, goal);
 
   return (
     <div className="flex flex-col gap-6 mt-6 mb-8">
+      <BmiCard heightCm={profile.heightCm} weightKg={profile.weightKg} />
+
+      <AverageVsGoal
+        average={summary.averageCalories}
+        goal={goal}
+        percent={summary.averagePercentOfGoal}
+        days={series.length}
+      />
+
       <section className="stats stats-vertical lg:stats-horizontal shadow-sm w-full bg-base-100">
         <div className="stat text-center">
           <div className="stat-value text-2xl lg:text-4xl">
@@ -164,5 +185,43 @@ function ProgressContent({
         </div>
       </section>
     </div>
+  );
+}
+
+// Relação direta entre a média dos últimos dias e a meta diária.
+function AverageVsGoal({
+  average,
+  goal,
+  percent,
+  days,
+}: {
+  average: number | null;
+  goal: number | null;
+  percent: number | null;
+  days: number;
+}) {
+  if (goal === null || average === null || percent === null) return null;
+
+  const difference = average - goal;
+  const over = difference > 0;
+
+  return (
+    <section
+      className={`alert ${over ? 'alert-error' : 'alert-success'} alert-soft`}
+      data-testid="average-vs-goal"
+    >
+      <div>
+        <p className="font-semibold">
+          Sua média ({average} kcal) é {percent}% da sua meta de {goal} kcal.
+        </p>
+        <p className="text-sm">
+          {difference === 0
+            ? `Nos últimos ${days} dias, a média ficou exatamente na meta.`
+            : over
+              ? `Nos últimos ${days} dias, você ficou em média ${difference} kcal acima da meta.`
+              : `Nos últimos ${days} dias, você ficou em média ${-difference} kcal abaixo da meta.`}
+        </p>
+      </div>
+    </section>
   );
 }
