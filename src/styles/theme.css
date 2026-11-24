@@ -36,3 +36,83 @@
   --depth: 1;
   --noise: 0;
 }
+
+/* Tema escuro: mesma identidade verde, fundo escuro. */
+@plugin 'daisyui/theme' {
+  name: 'sinutre-escuro';
+  default: false;
+  prefersdark: false;
+  color-scheme: dark;
+
+  --color-base-100: oklch(24% 0.015 240);
+  --color-base-200: oklch(20% 0.015 240);
+  --color-base-300: oklch(30% 0.015 240);
+  --color-base-content: oklch(93% 0.01 240);
+
+  --color-primary: oklch(68% 0.17 155);
+  --color-primary-content: oklch(18% 0.03 155);
+  --color-secondary: oklch(70% 0.13 160);
+  --color-secondary-content: oklch(18% 0.03 160);
+  --color-accent: oklch(75% 0.15 145);
+  --color-accent-content: oklch(18% 0.03 145);
+  --color-neutral: oklch(36% 0.03 150);
+  --color-neutral-content: oklch(94% 0.01 150);
+
+  --color-info: oklch(72% 0.14 220);
+  --color-info-content: oklch(18% 0.03 220);
+  --color-success: oklch(70% 0.19 145);
+  --color-success-content: oklch(18% 0.03 145);
+  --color-warning: oklch(82% 0.17 80);
+  --color-warning-content: oklch(20% 0.04 80);
+  --color-error: oklch(66% 0.21 25);
+  --color-error-content: oklch(98% 0.01 25);
+
+  --radius-selector: 1rem;
+  --radius-field: 0.5rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 0;
+}
+
+/* Tema oceano: claro, com tons de azul no lugar do verde. */
+@plugin 'daisyui/theme' {
+  name: 'sinutre-oceano';
+  default: false;
+  prefersdark: false;
+  color-scheme: light;
+
+  --color-base-100: oklch(100% 0 0);
+  --color-base-200: oklch(96% 0.012 235);
+  --color-base-300: oklch(91% 0.02 235);
+  --color-base-content: oklch(22% 0.03 250);
+
+  --color-primary: oklch(50% 0.16 250);
+  --color-primary-content: oklch(98% 0.01 250);
+  --color-secondary: oklch(58% 0.12 215);
+  --color-secondary-content: oklch(98% 0.01 215);
+  --color-accent: oklch(70% 0.13 195);
+  --color-accent-content: oklch(20% 0.03 195);
+  --color-neutral: oklch(32% 0.04 250);
+  --color-neutral-content: oklch(96% 0.01 250);
+
+  --color-info: oklch(70% 0.15 220);
+  --color-info-content: oklch(98% 0.01 220);
+  --color-success: oklch(62% 0.17 160);
+  --color-success-content: oklch(98% 0.01 160);
+  --color-warning: oklch(80% 0.18 80);
+  --color-warning-content: oklch(20% 0.04 80);
+  --color-error: oklch(60% 0.22 25);
+  --color-error-content: oklch(98% 0.01 25);
+
+  --radius-selector: 1rem;
+  --radius-field: 0.5rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 0;
+}

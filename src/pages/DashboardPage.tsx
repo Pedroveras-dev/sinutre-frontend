@@ -128,7 +128,7 @@ export function DashboardPage({ drawerId }: DashboardPageProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center w-full h-full">
-        <span className="text-gray-500">Carregando...</span>
+        <span className="text-base-content/60">Carregando...</span>
       </div>
     );
   }

@@ -5,6 +5,15 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Nutridash — Dashboard de Nutrição</title>
+    <script>
+      // Aplica o tema salvo antes da primeira pintura (ver src/utils/theme.ts).
+      try {
+        var t = localStorage.getItem('sinutre.theme');
+        if (t === 'sinutre-escuro' || t === 'sinutre-oceano') {
+          document.documentElement.setAttribute('data-theme', t);
+        }
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>
