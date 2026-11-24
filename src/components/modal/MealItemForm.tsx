@@ -56,6 +56,12 @@ export function MealItemForm({ onAdd, addedFoodIds }: MealItemFormProps) {
       return;
     }
 
+    // Mesmo limite do backend (src/controllers/meals.controller.ts).
+    if (gramsValue > 5000) {
+      setError('A quantidade máxima por alimento é 5000 g.');
+      return;
+    }
+
     setError(null);
 
     onAdd({
