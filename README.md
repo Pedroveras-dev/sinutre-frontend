@@ -1,31 +1,53 @@
-# sinutre-frontend
+## Sinutre — Projeto Final
 
-Frontend do **SiNutre — Sistema de Ingestão de Macronutrientes**: dashboard de
-nutrição em **React 19 + TypeScript + Vite 6**, com **Tailwind CSS v4** e
-**daisyUI v5**.
+**Frontend (Vercel):** https://sinutre-frontend-alpha.vercel.app
 
-> Fork de [danilob/sinutre-frontend](https://github.com/danilob/sinutre-frontend)
-> (projeto didático do professor), com a funcionalidade **meta diária de
-> calorias por usuário** e a preparação para deploy.
->
-> - Backend deste sistema: <https://github.com/Pedroveras-dev/sinutre-backend>
-> - Site publicado: <https://sinutre-frontend-alpha.vercel.app>
-> - API publicada: <https://sinutre-backend.onrender.com> (verificação: [`/health`](https://sinutre-backend.onrender.com/health))
+**Backend (Railway):** https://sinutre-backend-production-37ce0f19.up.railway.app
 
-## O que este fork acrescenta
+**Repositório do backend:** https://github.com/Pedroveras-dev/sinutre-backend
+
+Fork de [danilob/sinutre-frontend](https://github.com/danilob/sinutre-frontend)
+(projeto didático do professor). Frontend em **React 19 + TypeScript + Vite 6**,
+com **Tailwind CSS v4** e **daisyUI v5**.
+
+### Funcionalidades desenvolvidas
+
+- [01] Alterar alimento — botão **Editar** em cada alimento da página Dieta (`PUT /foods/:id`).
+- [02] Excluir alimento — botão **Apagar** com confirmação; se o alimento estiver em alguma refeição, o backend recusa e a tela diz em quantas.
+- [03] Validação no cadastro de alimento — nome obrigatório (até 100 caracteres) e macros numéricos ≥ 0, no frontend e no backend.
+- [04] Cadastrar meta diária, altura e peso — página **Configurações**, com validação (meta 500–10000 kcal; altura 50–250 cm; peso 20–400 kg).
+- [05] Alterar meta, altura e peso — os mesmos formulários; cada alteração gera um registro novo e o histórico fica no banco.
+- [06] Meta do banco no dashboard — o valor fixo `caloriesGoal: 1000` do original foi trocado pela meta do usuário; sem meta, o card diz isso em vez de mostrar um número inventado.
+- [07] Sinalizar meta ultrapassada — card e calorias do dashboard ficam em vermelho com "Você ultrapassou a meta em X kcal".
+- [08] Página de métricas no menu — item **Métricas** (`/stats`) com IMC e média de calorias.
+- [09] IMC e faixa — IMC calculado da altura e do peso, com a faixa da OMS destacada (abaixo do peso, normal, sobrepeso, obesidade I, II e III).
+- [10] Média dos últimos 7 dias e relação com a meta — "Sua média (X kcal) é Y% da sua meta", quanto ficou acima ou abaixo, dias dentro da meta e gráfico por dia.
+- [11] Logout — botão **Sair** no menu; um token expirado (401) também volta ao login.
+- [12] Mudar as cores da interface — em Configurações → Aparência: temas **Claro**, **Escuro** e **Oceano**, salvos no navegador.
+
+### Além da tabela
+
+- **Correção do cálculo de "hoje":** o original usava `getDay()` (dia da semana) e somava refeições de outras semanas no dia atual.
+- **Correção de queda do servidor:** erros em rotas assíncronas derrubavam o backend; agora respondem 400/404/500 com mensagem.
+- **Apagar refeições** no dashboard, recalculando os totais e o progresso da meta.
+- **Editar alimento preserva o histórico:** refeições antigas mantêm os valores da época em que foram registradas.
+- **Gráfico dos últimos 7 dias** com a linha da meta, feito só com HTML e CSS.
+- **Testes automatizados:** 50 testes unitários no frontend (vitest) e 26 de integração no backend, incluindo isolamento entre usuários.
+- **Banco PostgreSQL persistente** no lugar do SQLite em arquivo.
+- Estados de carregamento, erro, envio e sucesso em todos os formulários; layout responsivo.
 
 | Mudança | Onde |
 |---|---|
-| Página **Configurações** (`/settings`) com o formulário da meta | `src/pages/SettingsPage.tsx` |
+| Configurações: meta, altura e peso, aparência | `src/pages/SettingsPage.tsx`, `src/components/settings/` |
 | Card de progresso da meta no dashboard | `src/components/cards/CalorieGoalCard.tsx` |
-| Regras e validação da meta | `src/utils/calorieGoal.ts` |
-| Chamadas `GET/PUT /calorie-goal` | `src/services/calorieGoalService.ts` |
+| Regras da meta, de altura/peso, IMC e temas | `src/utils/calorieGoal.ts`, `src/utils/profile.ts`, `src/utils/theme.ts` |
+| Chamadas à API | `src/services/` |
 | Correção do cálculo "calorias de hoje" | `src/utils/date.ts`, `src/utils/mealSummary.ts` |
 | Testes unitários (vitest) | `src/utils/*.test.ts` |
 | Volta ao login em `401` e botão **Sair** | `src/lib/api.ts`, `src/components/layout/Sidebar.tsx` |
 | Editar e apagar alimentos | `src/pages/DietFood.tsx`, `src/components/modal/FoodFormModal.tsx`, `src/utils/food.ts` |
 | Apagar refeições | `src/pages/DashboardPage.tsx`, `src/components/modal/ConfirmDialog.tsx` |
-| Página **Progresso** (`/stats`) com gráfico dos últimos 7 dias | `src/pages/ProgressPage.tsx`, `src/components/charts/CaloriesBarChart.tsx`, `src/utils/progress.ts` |
+| Página **Métricas** (`/stats`) | `src/pages/ProgressPage.tsx`, `src/components/cards/BmiCard.tsx`, `src/components/charts/CaloriesBarChart.tsx`, `src/utils/progress.ts` |
 
 ### Meta diária de calorias
 
@@ -64,10 +86,29 @@ O original só permitia cadastrar. Agora:
 - Editar um alimento **não altera refeições já registradas**: elas guardam os
   valores da época em que foram criadas.
 
-### Página Progresso
+### Altura, peso e IMC
 
-O item "Progresso" do menu apontava para uma rota que não existia. Agora
-mostra as calorias dos **últimos 7 dias** comparadas com a meta:
+- Em **Configurações**, o cartão **Altura e peso** aceita altura em cm e peso
+  em kg (com vírgula ou ponto). Os dados vão para `PUT /profile`; quem ainda
+  não cadastrou vê os campos vazios.
+- Na página **Métricas**, o IMC é `peso / altura²`, com 1 casa decimal. A
+  faixa é decidida pelo valor arredondado, para o número e a faixa nunca se
+  contradizerem. Sem altura e peso, o cartão leva para Configurações.
+
+### Temas de cor
+
+Configurações → **Aparência** troca as cores na hora. Os três temas estão em
+`src/styles/theme.css`; a escolha fica no `localStorage` (`sinutre.theme`) e um
+script no `index.html` aplica o tema antes da primeira pintura, para a tela
+não piscar.
+
+### Página Métricas
+
+O item "Progresso" do menu apontava para uma rota que não existia. Agora se
+chama **Métricas** e mostra o IMC e as calorias dos **últimos 7 dias**
+comparadas com a meta:
+
+- a média do período como porcentagem da meta e quanto ficou acima ou abaixo;
 
 - gráfico de barras por dia, com a linha da meta; dias acima da meta ficam em
   vermelho e marcados com ▲, e dias sem registro ficam em cinza;
@@ -77,7 +118,7 @@ mostra as calorias dos **últimos 7 dias** comparadas com a meta:
   números em tabela.
 
 O gráfico é feito com HTML e CSS, sem biblioteca. Os dados vêm das rotas que
-já existiam (`GET /meals` e `GET /calorie-goal`); o agrupamento por dia é
+`GET /meals`, `GET /calorie-goal` e `GET /profile`; o agrupamento por dia é
 feito no navegador, no fuso do usuário.
 
 ## Instalação e execução local
@@ -103,7 +144,7 @@ Variáveis `VITE_*` são embutidas no JavaScript público no momento do build:
 
 ```bash
 npm run lint    # ESLint
-npm test        # vitest: validação da meta e de alimentos, progresso e cálculo diário
+npm test        # vitest: meta, alimentos, altura/peso, IMC, progresso e cálculo diário
 npm run build   # tsc -b + vite build
 ```
 
@@ -118,47 +159,42 @@ Roteiro manual:
 6. Em **Dieta**, edite um alimento: as refeições antigas mantêm os totais.
 7. Tente apagar um alimento usado em refeição (recusado, com aviso); apague
    a refeição no dashboard e depois o alimento.
-8. Clique em **Sair** e entre com outra conta: a meta dela é independente.
+8. Em **Configurações**, tente altura `1,75` (rejeitada: é em cm) e salve
+   `175` e `72,5`. Em **Métricas**, veja o IMC 23,7 na faixa "Peso normal".
+9. Em **Configurações → Aparência**, escolha **Escuro**; recarregue: o tema continua.
+10. Clique em **Sair** e entre com outra conta: meta, altura e peso dela são independentes.
 
 ## Deploy
 
-O frontend é um site estático (pasta `dist`). O repositório traz a
-configuração de duas opções gratuitas, ambas com HTTPS; use uma delas.
-
-### Opção A — Vercel
+O frontend é um site estático (pasta `dist`) publicado na **Vercel**:
 
 1. Em <https://vercel.com/new>, importe este repositório. A Vercel detecta o
    Vite sozinha (build `npm run build`, saída `dist`).
 2. Em **Environment Variables**, crie `VITE_API_URL` com a URL pública do
-   backend (`https://SEU-BACKEND.onrender.com`, sem `/` final) e faça o deploy.
+   backend no Railway (sem `/` final) e faça o deploy.
 3. O `vercel.json` reescreve qualquer caminho para `/index.html`, o que
-   permite abrir ou recarregar `/settings` e `/foods` diretamente.
+   permite abrir ou recarregar `/settings`, `/foods` e `/stats` diretamente.
 
-### Opção B — Render Static Site
+Observações:
 
-*New → Blueprint* e escolha este repositório. O `render.yaml` define o build
-`npm ci && npm run build`, a pasta `dist` e a mesma regra de rewrite. Informe
-`VITE_API_URL` quando o Render pedir.
-
-### Nas duas opções
-
-- `VITE_API_URL` é lida no **build**: mudar o valor exige um novo deploy.
+- `VITE_API_URL` é lida no **build**: mudar o valor exige um novo deploy
+  (*Deployments → ⋯ → Redeploy*).
 - No backend, `FRONTEND_URL` deve ser exatamente a URL deste site (CORS e
   redirect do login). Use a URL de produção fixa, não as URLs de preview.
-- O backend gratuito hiberna após 15 min sem uso; o primeiro acesso depois
-  disso pode levar cerca de 1 minuto.
+- O `render.yaml` continua no repositório como alternativa (Render Static Site).
 
 ## Estrutura
 
 ```
 src/
-├── components/   # cards, forms, layout, macros, meals, modal
+├── components/   # cards, charts, forms, layout, macros, meals, modal, settings
 ├── constants/    # categorias de refeição, itens de navegação
 ├── context/      # AuthContext (usuário autenticado)
 ├── lib/          # cliente HTTP (axios + token)
-├── pages/        # Dashboard, DietFood, Progress, Settings, Login
+├── pages/        # Dashboard, DietFood, Progress (Métricas), Settings, Login
 ├── routes/       # rotas e rota protegida
 ├── services/     # chamadas à API
+├── styles/       # Tailwind e temas Claro, Escuro e Oceano
 ├── types/        # tipos de domínio
-└── utils/        # datas, resumo diário, progresso, regras da meta (+ testes)
+└── utils/        # datas, resumo diário, progresso, meta, perfil/IMC, temas (+ testes)
 ```
